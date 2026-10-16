@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REVALORA - Economía Circular & Donaciones Perú</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        peruRed: {
+                            DEFAULT: '#C8102E',
+                            dark: '#9B0B21',
+                            light: '#FFF0F2'
+                        },
+                        peruGreen: {
+                            DEFAULT: '#008751',
+                            dark: '#005E38',
+                            light: '#E6F5ED'
+                        },
+                        neutralDark: '#1E293B',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet JS & CSS for Interactive Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Canvas Confetti for Interactive Rewards -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- jsPDF for Certificate Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #008751;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #005E38;
+        }
+
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 135, 81, 0.15);
+        }
+
+        .hero-pattern {
+            background-color: #ffffff;
+            background-image: radial-gradient(#008751 0.75px, transparent 0.75px), radial-gradient(#C8102E 0.75px, #ffffff 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            background-opacity: 0.05;
+        }
+
+        .badge-pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(200, 16, 46, 0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(200, 16, 46, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(200, 16, 46, 0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
+
+    <!-- TOP ANNOUNCEMENT BANNER -->
+    <div class="bg-gradient-to-r from-peruRed via-peruGreen to-peruRed text-white text-xs md:text-sm py-2 px-4 text-center font-medium flex justify-between items-center shadow-md">
+        <div class="flex-1 text-center flex items-center justify-center gap-2">
+            <span class="bg-white text-peruRed font-bold px-2 py-0.5 rounded-full text-xs uppercase tracking-wide">¡NUEVO!</span>
+            <span>Modulo de <strong>Donaciones Materiales</strong> activo. ¡Apoya a escuelas y comunidades vulnerables!</span>
+        </div>
+        <button onclick="this.parentElement.style.display='none'" class="text-white hover:text-gray-200 ml-2 focus:outline-none">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- MAIN NAVIGATION BAR -->
+    <nav class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <!-- Brand Logo & Badge -->
+                <div class="flex items-center gap-3">
+                    <a href="#" class="flex items-center gap-2 group">
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-peruRed to-peruGreen flex items-center justify-center text-white text-xl font-black shadow-md group-hover:scale-105 transition-transform">
+                            <i class="fas fa-recycle"></i>
+                        </div>
+                        <div>
+                            <span class="text-2xl font-black tracking-tight text-gray-900">REVALORA<span class="text-peruRed">.pe</span></span>
+                            <span class="block text-[10px] text-peruGreen font-bold tracking-widest uppercase">Perú Economía Circular</span>
+                        </div>
+                    </a>
+                    <!-- FREE TRIAL BADGE -->
+                    <span class="hidden lg:inline-flex items-center gap-1 px-3 py-1 bg-peruGreen-light text-peruGreen-dark rounded-full text-xs font-bold border border-peruGreen/30 badge-pulse">
+                        <i class="fas fa-gift"></i> Pruebas Gratis 30 Días Pymes
+                    </span>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="hidden md:flex items-center space-x-1 lg:space-x-6 text-sm font-semibold text-gray-700">
+                    <a href="#donaciones" class="hover:text-peruRed transition-colors py-2 px-3 rounded-lg hover:bg-peruRed-light flex items-center gap-1.5">
+                        <i class="fas fa-hand-holding-heart text-peruRed"></i> Donaciones
+                    </a>
+                    <a href="#mercado" class="hover:text-peruGreen transition-colors py-2 px-3 rounded-lg hover:bg-peruGreen-light flex items-center gap-1.5">
+                        <i class="fas fa-store text-peruGreen"></i> Mercado Circular
+                    </a>
+                    <a href="#precios" class="hover:text-peruRed transition-colors py-2 px-3 rounded-lg hover:bg-peruRed-light flex items-center gap-1.5">
+                        <i class="fas fa-chart-line text-peruRed"></i> Referencial Precios
+                    </a>
+                    <a href="#impacto" class="hover:text-peruGreen transition-colors py-2 px-3 rounded-lg hover:bg-peruGreen-light flex items-center gap-1.5">
+                        <i class="fas fa-calculator text-peruGreen"></i> Simular Impacto
+                    </a>
+                    <a href="#mapa" class="hover:text-peruRed transition-colors py-2 px-3 rounded-lg hover:bg-peruRed-light flex items-center gap-1.5">
+                        <i class="fas fa-map-marker-alt text-peruRed"></i> Puntos Acopio
+                    </a>
+                    <a href="#hub-jovenes" class="hover:text-peruGreen transition-colors py-2 px-3 rounded-lg hover:bg-peruGreen-light flex items-center gap-1.5">
+                        <i class="fas fa-graduation-cap text-peruGreen"></i> Hub Emprendedores
+                    </a>
+                </div>
+
+                <!-- Action Buttons & Onboarding Modal Trigger -->
+                <div class="flex items-center gap-2">
+                    <button onclick="openModal('modal-onboarding')" class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-peruRed bg-peruRed-light hover:bg-peruRed hover:text-white border border-peruRed/20 transition-all shadow-xs">
+                        <i class="fas fa-building-user"></i> Registrar Mi Pyme
+                    </button>
+                    <button onclick="openModal('modal-donar')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-peruGreen to-peruGreen-dark hover:from-peruGreen-dark hover:to-peruGreen transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5">
+                        <i class="fas fa-heart"></i> Donar Material
+                    </button>
+                    <!-- Mobile menu button -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-gray-200 bg-white px-4 pt-2 pb-4 space-y-2">
+            <a href="#donaciones" class="block py-2 text-gray-800 font-medium hover:text-peruRed"><i class="fas fa-hand-holding-heart text-peruRed mr-2"></i>Donaciones</a>
+            <a href="#mercado" class="block py-2 text-gray-800 font-medium hover:text-peruGreen"><i class="fas fa-store text-peruGreen mr-2"></i>Mercado Circular</a>
+            <a href="#precios" class="block py-2 text-gray-800 font-medium hover:text-peruRed"><i class="fas fa-chart-line text-peruRed mr-2"></i>Precios Referenciales</a>
+            <a href="#impacto" class="block py-2 text-gray-800 font-medium hover:text-peruGreen"><i class="fas fa-calculator text-peruGreen mr-2"></i>Simulador Impacto</a>
+            <a href="#mapa" class="block py-2 text-gray-800 font-medium hover:text-peruRed"><i class="fas fa-map-marker-alt text-peruRed mr-2"></i>Mapa Puntos de Acopio</a>
+            <a href="#hub-jovenes" class="block py-2 text-gray-800 font-medium hover:text-peruGreen"><i class="fas fa-graduation-cap text-peruGreen mr-2"></i>Hub Emprendedores Jóvenes</a>
+            <button onclick="openModal('modal-onboarding')" class="w-full mt-2 py-2 bg-peruRed-light text-peruRed font-bold rounded-lg"><i class="fas fa-building-user mr-2"></i>Registrar Mi Pyme</button>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="relative bg-gradient-to-b from-peruGreen-light/30 via-white to-gray-50 pt-12 pb-20 overflow-hidden hero-pattern">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Left Hero Copy -->
+                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-peruRed-light text-peruRed text-xs sm:text-sm font-bold border border-peruRed/20">
+                        <i class="fas fa-flag text-peruRed"></i> Transformando Residuos en Oportunidades en Perú
+                    </div>
+                    
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 tracking-tight leading-tight">
+                        Mercado Circular & <span class="bg-gradient-to-r from-peruRed via-peruGreen to-peruRed bg-clip-text text-transparent">Donaciones Eco-Sociales</span>
+                    </h1>
+                    
+                    <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto lg:mx-0 font-normal">
+                        Conectamos pymes, empresas y personas para **revalorizar sobrantes de materia prima** o **donar insumos reutilizables** a colegios, talleres comunitarios y recicladores formalizados.
+                    </p>
+
+                    <!-- Core Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
+                        <button onclick="openModal('modal-donar')" class="px-8 py-4 bg-peruRed hover:bg-peruRed-dark text-white rounded-2xl font-bold text-base shadow-lg shadow-peruRed/25 hover:shadow-xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-3">
+                            <i class="fas fa-heart-circle-check text-xl"></i> Donar Material Sobrante
+                        </button>
+                        <a href="#mercado" class="px-8 py-4 bg-white hover:bg-gray-50 text-peruGreen border-2 border-peruGreen rounded-2xl font-bold text-base shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-3">
+                            <i class="fas fa-boxes-packing text-xl"></i> Explorar Materiales
+                        </a>
+                    </div>
+
+                    <!-- Live KPI Badges -->
+                    <div class="pt-6 grid grid-cols-3 gap-4 border-t border-gray-200/80">
+                        <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-xs">
+                            <div class="text-2xl font-black text-peruGreen" id="kpi-toneladas">1,240 Tn</div>
+                            <div class="text-xs text-gray-500 font-medium">Material Revalorizado</div>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-xs">
+                            <div class="text-2xl font-black text-peruRed" id="kpi-donaciones">480+</div>
+                            <div class="text-xs text-gray-500 font-medium">Donaciones Entregadas</div>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-xs">
+                            <div class="text-2xl font-black text-peruGreen-dark" id="kpi-pymes">850 Pymes</div>
+                            <div class="text-xs text-gray-500 font-medium">Registradas con Licencia</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Hero Interactive Cards / Quick Simulation -->
+                <div class="lg:col-span-5">
+                    <div class="bg-white rounded-3xl p-6 shadow-2xl border border-gray-100 space-y-6 relative">
+                        <div class="absolute -top-3 -right-3 bg-peruRed text-white text-xs font-extrabold px-3 py-1 rounded-full shadow-md uppercase tracking-wider">
+                            Directo & Transparente
+                        </div>
+
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-arrows-rotate text-peruGreen"></i> ¿Qué deseas hacer hoy?
+                        </h3>
+
+                        <!-- Interactive Selector Tabs -->
+                        <div class="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-2xl text-xs font-bold">
+                            <button onclick="switchHeroTab('donar')" id="hero-tab-donar" class="py-2.5 px-3 rounded-xl bg-white text-peruRed shadow-xs transition-all">
+                                <i class="fas fa-gift mr-1"></i> Donar Recurso
+                            </button>
+                            <button onclick="switchHeroTab('vender')" id="hero-tab-vender" class="py-2.5 px-3 rounded-xl text-gray-600 hover:text-gray-900 transition-all">
+                                <i class="fas fa-hand-holding-dollar mr-1"></i> Vender Residual
+                            </button>
+                        </div>
+
+                        <!-- Hero Interactive Form Preview -->
+                        <div id="hero-content-donar" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Tipo de Material sobrante</label>
+                                <select id="hero-donacion-tipo" class="w-full text-sm rounded-xl border-gray-300 bg-gray-50 focus:border-peruGreen focus:ring-peruGreen p-2.5">
+                                    <option value="madera">Retazos de Madera y Pallets</option>
+                                    <option value="textil">Saldos Textiles / Algodón</option>
+                                    <option value="computo">Equipos de Cómputo Reutilizables</option>
+                                    <option value="carton">Cartón Corrugado / Papel</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Destinatario Sugerido</label>
+                                <select class="w-full text-sm rounded-xl border-gray-300 bg-gray-50 focus:border-peruGreen focus:ring-peruGreen p-2.5">
+                                    <option>Colegios Públicos y Talleres Técnicos</option>
+                                    <option>Asociaciones de Recicladores San Juan de Lurigancho</option>
+                                    <option>Emprendimientos Sociales de Arpillera</option>
+                                </select>
+                            </div>
+                            <button onclick="openModal('modal-donar')" class="w-full py-3 bg-peruGreen hover:bg-peruGreen-dark text-white font-bold rounded-xl text-sm transition-all shadow-md flex items-center justify-center gap-2">
+                                Continuar Donación <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+
+                        <div id="hero-content-vender" class="space-y-4 hidden">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Material Comercializable</label>
+                                <select id="hero-venta-tipo" class="w-full text-sm rounded-xl border-gray-300 bg-gray-50 focus:border-peruRed focus:ring-peruRed p-2.5">
+                                    <option>Cobre / Chatarra Metálica</option>
+                                    <option>Plástico PET Triturado / Bobinas</option>
+                                    <option>Aceite Vegetal Usado (AVU)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Cantidad estimada (Kg/Tn)</label>
+                                <input type="number" placeholder="Ej: 500" class="w-full text-sm rounded-xl border-gray-300 bg-gray-50 p-2.5">
+                            </div>
+                            <a href="#precios" class="w-full py-3 bg-peruRed hover:bg-peruRed-dark text-white font-bold rounded-xl text-sm transition-all shadow-md flex items-center justify-center gap-2 text-center block">
+                                Cotizar Precio Referencial <i class="fas fa-chart-line"></i>
+                            </a>
+                        </div>
+
+                        <!-- Micro Trust Banner -->
+                        <div class="text-center pt-2 border-t border-gray-100 flex items-center justify-center gap-4 text-xs text-gray-500">
+                            <span><i class="fas fa-shield-halved text-peruGreen mr-1"></i> Verificación SUNAT</span>
+                            <span><i class="fas fa-file-contract text-peruRed mr-1"></i> Certificado de Impacto</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW MODULE: DONACIONES DE PRODUCTOS Y MATERIALES -->
+    <section id="donaciones" class="py-16 bg-white border-y border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="px-3 py-1 bg-peruRed-light text-peruRed text-xs font-extrabold rounded-full uppercase tracking-wider">
+                    Impacto Social & Solidario
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-black text-gray-900 mt-3">
+                    Módulo de Donaciones de Productos y Materiales
+                </h2>
+                <p class="text-gray-600 mt-2">
+                    Las empresas y personas pueden donar remanentes en buen estado o materiales reciclables directamente a proyectos comunitarios, escuelas de escasos recursos y asociaciones de reciclaje.
+                </p>
+            </div>
+
+            <!-- Interactive Donation Flow Steps -->
+            <div class="grid md:grid-cols-4 gap-6 mb-12">
+                <div class="bg-gradient-to-br from-gray-50 to-peruGreen-light/20 p-6 rounded-2xl border border-peruGreen/20 text-center relative group hover:border-peruGreen transition-all">
+                    <div class="w-12 h-12 mx-auto bg-peruGreen text-white rounded-full flex items-center justify-center font-bold text-lg mb-4 shadow-md group-hover:scale-110 transition-transform">1</div>
+                    <h3 class="font-bold text-gray-900 text-base mb-1">Registra tu Insumo</h3>
+                    <p class="text-xs text-gray-600">Sube fotos, cantidad y estado del sobrante (madera, tela, papel, artefactos, etc.).</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-gray-50 to-peruRed-light/20 p-6 rounded-2xl border border-peruRed/20 text-center relative group hover:border-peruRed transition-all">
+                    <div class="w-12 h-12 mx-auto bg-peruRed text-white rounded-full flex items-center justify-center font-bold text-lg mb-4 shadow-md group-hover:scale-110 transition-transform">2</div>
+                    <h3 class="font-bold text-gray-900 text-base mb-1">Elige Causas</h3>
+                    <p class="text-xs text-gray-600">Filtra escuelas, talleres de emprendedoras o asociaciones de recicladores verificate.</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-gray-50 to-peruGreen-light/20 p-6 rounded-2xl border border-peruGreen/20 text-center relative group hover:border-peruGreen transition-all">
+                    <div class="w-12 h-12 mx-auto bg-peruGreen text-white rounded-full flex items-center justify-center font-bold text-lg mb-4 shadow-md group-hover:scale-110 transition-transform">3</div>
+                    <h3 class="font-bold text-gray-900 text-base mb-1">Coordinación / Acopio</h3>
+                    <p class="text-xs text-gray-600">Programa el recojo o entrega en los Puntos de Acopio Eco-Perú autorizados.</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-gray-50 to-peruRed-light/20 p-6 rounded-2xl border border-peruRed/20 text-center relative group hover:border-peruRed transition-all">
+                    <div class="w-12 h-12 mx-auto bg-peruRed text-white rounded-full flex items-center justify-center font-bold text-lg mb-4 shadow-md group-hover:scale-110 transition-transform">4</div>
+                    <h3 class="font-bold text-gray-900 text-base mb-1">Insignia & Certificado</h3>
+                    <p class="text-xs text-gray-600">Recibe tu certificado de impacto y la insignia virtual "Aliado Solidario Perú".</p>
+                </div>
+            </div>
+
+            <!-- Active Causes & Donation Requests List -->
+            <div class="bg-gray-50 p-6 rounded-3xl border border-gray-200">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900">Solicitudes de Donación Activas</h3>
+                        <p class="text-xs text-gray-500">Organizaciones verificadas esperando insumos y materiales</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="filterDonations('todos')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-900 text-white hover:bg-black">Todos</button>
+                        <button onclick="filterDonations('colegio')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-gray-700 border border-gray-300 hover:bg-peruGreen-light">Colegios</button>
+                        <button onclick="filterDonations('reciclador')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-gray-700 border border-gray-300 hover:bg-peruRed-light">Recicladores</button>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6" id="donations-grid">
+                    <!-- Cause 1 -->
+                    <div class="cause-card colegio bg-white rounded-2xl p-5 border border-gray-200 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-3">
+                                <span class="px-2.5 py-1 bg-peruGreen-light text-peruGreen-dark text-[11px] font-bold rounded-lg">
+                                    <i class="fas fa-school mr-1"></i> Colegio Público Fe y Alegría
+                                </span>
+                                <span class="text-xs text-gray-400"><i class="fas fa-location-dot text-peruRed"></i> Ate, Lima</span>
+                            </div>
+                            <h4 class="font-bold text-gray-900 text-base mb-2">Se necesitan retazos de madera y tableros MDF</h4>
+                            <p class="text-xs text-gray-600 mb-4">Para taller técnico de carpintería escolar. Permitirá a 120 alumnos fabricar sillas y escritorios.</p>
+                            <!-- Progress bar -->
+                            <div class="space-y-1 mb-4">
+                                <div class="flex justify-between text-xs text-gray-600 font-medium">
+                                    <span>Meta: 300 Kg</span>
+                                    <span class="text-peruGreen font-bold">180 Kg (60%)</span>
+                                </div>
+                                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-peruGreen h-full rounded-full" style="width: 60%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="atenderDonacion('Colegio Fe y Alegría - Madera')" class="w-full py-2.5 bg-peruRed text-white rounded-xl font-bold text-xs hover:bg-peruRed-dark transition-all flex items-center justify-center gap-2">
+                            <i class="fas fa-hand-holding-heart"></i> Donar a esta Causa
+                        </button>
+                    </div>
+
+                    <!-- Cause 2 -->
+                    <div class="cause-card reciclador bg-white rounded-2xl p-5 border border-gray-200 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-3">
+                                <span class="px-2.5 py-1 bg-peruRed-light text-peruRed text-[11px] font-bold rounded-lg">
+                                    <i class="fas fa-recycle mr-1"></i> Asociación Recicla Lima Sur
+                                </span>
+                                <span class="text-xs text-gray-400"><i class="fas fa-location-dot text-peruRed"></i> Villa El Salvador</span>
+                            </div>
+                            <h4 class="font-bold text-gray-900 text-base mb-2">Requerimiento de Big Bags y Sacos de Polipropileno</h4>
+                            <p class="text-xs text-gray-600 mb-4">Para acopio y segregación de envases PET por parte de 35 familias de recicladores formalizados.</p>
+                            <!-- Progress bar -->
+                            <div class="space-y-1 mb-4">
+                                <div class="flex justify-between text-xs text-gray-600 font-medium">
+                                    <span>Meta: 150 Unidades</span>
+                                    <span class="text-peruRed font-bold">105 Unid (70%)</span>
+                                </div>
+                                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-peruRed h-full rounded-full" style="width: 70%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="atenderDonacion('Recicla Lima Sur - Big Bags')" class="w-full py-2.5 bg-peruGreen text-white rounded-xl font-bold text-xs hover:bg-peruGreen-dark transition-all flex items-center justify-center gap-2">
+                            <i class="fas fa-hand-holding-heart"></i> Donar a esta Causa
+                        </button>
+                    </div>
+
+                    <!-- Cause 3 -->
+                    <div class="cause-card colegio bg-white rounded-2xl p-5 border border-gray-200 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-3">
+                                <span class="px-2.5 py-1 bg-peruGreen-light text-peruGreen-dark text-[11px] font-bold rounded-lg">
+                                    <i class="fas fa-shirt mr-1"></i> Taller Social Manos Emprendedoras
+                                </span>
+                                <span class="text-xs text-gray-400"><i class="fas fa-location-dot text-peruRed"></i> San Juan de Lurigancho</span>
+                            </div>
+                            <h4 class="font-bold text-gray-900 text-base mb-2">Saldos de Telas de Algodón o Denims</h4>
+                            <p class="text-xs text-gray-600 mb-4">Para confección de bolsas ecológicas reutilizables por madres solteras del distrito.</p>
+                            <!-- Progress bar -->
+                            <div class="space-y-1 mb-4">
+                                <div class="flex justify-between text-xs text-gray-600 font-medium">
+                                    <span>Meta: 100 Metros</span>
+                                    <span class="text-peruGreen font-bold">35 Metros (35%)</span>
+                                </div>
+                                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-peruGreen h-full rounded-full" style="width: 35%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="atenderDonacion('Taller Manos Emprendedoras - Telas')" class="w-full py-2.5 bg-peruRed text-white rounded-xl font-bold text-xs hover:bg-peruRed-dark transition-all flex items-center justify-center gap-2">
+                            <i class="fas fa-hand-holding-heart"></i> Donar a esta Causa
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MARKETPLACE & REFERENCE PRICES -->
+    <section id="mercado" class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
+                <div>
+                    <span class="px-3 py-1 bg-peruGreen-light text-peruGreen-dark text-xs font-extrabold rounded-full uppercase tracking-wider">
+                        Transacciones B2B / Pymes
+                    </span>
+                    <h2 class="text-3xl font-black text-gray-900 mt-2">Mercado de Residuos e Insumos Valiosos</h2>
+                    <p class="text-gray-600 text-sm">Filtra materiales disponibles para compra-venta o aprovechamiento industrial.</p>
+                </div>
+                <!-- Dynamic Filters -->
+                <div class="mt-4 md:mt-0 flex flex-wrap gap-2">
+                    <button onclick="filterMarket('all')" class="px-4 py-2 rounded-xl text-xs font-bold bg-peruGreen text-white shadow-xs">Todos</button>
+                    <button onclick="filterMarket('plastico')" class="px-4 py-2 rounded-xl text-xs font-bold bg-white text-gray-700 border hover:border-peruGreen">Plásticos / PET</button>
+                    <button onclick="filterMarket('metal')" class="px-4 py-2 rounded-xl text-xs font-bold bg-white text-gray-700 border hover:border-peruGreen">Metales</button>
+                    <button onclick="filterMarket('organico')" class="px-4 py-2 rounded-xl text-xs font-bold bg-white text-gray-700 border hover:border-peruGreen">Orgánicos/Biomasa</button>
+                </div>
+            </div>
+
+            <!-- Market Items Grid -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="market-grid">
+                <!-- Product 1 -->
+                <div class="market-item plastico bg-white rounded-2xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all group">
+                    <div class="h-44 bg-gray-100 relative overflow-hidden flex items-center justify-center">
+                        <span class="absolute top-3 left-3 bg-peruGreen text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase">Disponible</span>
+                        <i class="fas fa-bottle-water text-6xl text-peruGreen/40 group-hover:scale-110 transition-transform"></i>
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-gray-900 text-base">PET Molido Cristal (1ra Calidad)</h3>
+                            <span class="text-peruRed font-extrabold text-sm">S/ 2.80 / Kg</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-4">Lote limpio y seco de botellas post-consumo listo para extrusión.</p>
+                        <div class="text-[11px] text-gray-600 space-y-1 mb-4 bg-gray-50 p-2.5 rounded-xl">
+                            <div><i class="fas fa-weight-hanging text-peruGreen mr-1"></i> Stock: 2,500 Kg</div>
+                            <div><i class="fas fa-building text-peruRed mr-1"></i> Vendedor: PlástiCorp Pyme Lima</div>
+                            <div><i class="fas fa-location-dot text-gray-400 mr-1"></i> Ubicación: Callao, Lima</div>
+                        </div>
+                        <button onclick="solicitarInsumo('PET Molido Cristal')" class="w-full py-2.5 bg-gray-900 hover:bg-black text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-2">
+                            <i class="fas fa-comments"></i> Contactar Vendedor
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Product 2 -->
+                <div class="market-item metal bg-white rounded-2xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all group">
+                    <div class="h-44 bg-gray-100 relative overflow-hidden flex items-center justify-center">
+                        <span class="absolute top-3 left-3 bg-peruGreen text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase">Disponible</span>
+                        <i class="fas fa-cubes-stacked text-6xl text-peruRed/40 group-hover:scale-110 transition-transform"></i>
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-gray-900 text-base">Viruta de Aluminio Industrial</h3>
+                            <span class="text-peruRed font-extrabold text-sm">S/ 4.50 / Kg</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-4">Viruta proveniente de maquinado CNC. Bajo residuo de refrigerante.</p>
+                        <div class="text-[11px] text-gray-600 space-y-1 mb-4 bg-gray-50 p-2.5 rounded-xl">
+                            <div><i class="fas fa-weight-hanging text-peruGreen mr-1"></i> Stock: 800 Kg</div>
+                            <div><i class="fas fa-building text-peruRed mr-1"></i> Vendedor: Metalúrgica del Centro</div>
+                            <div><i class="fas fa-location-dot text-gray-400 mr-1"></i> Ubicación: Lurín, Lima</div>
+                        </div>
+                        <button onclick="solicitarInsumo('Viruta de Aluminio')" class="w-full py-2.5 bg-gray-900 hover:bg-black text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-2">
+                            <i class="fas fa-comments"></i> Contactar Vendedor
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Product 3 -->
+                <div class="market-item organico bg-white rounded-2xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all group">
+                    <div class="h-44 bg-gray-100 relative overflow-hidden flex items-center justify-center">
+                        <span class="absolute top-3 left-3 bg-peruGreen text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase">Disponible</span>
+                        <i class="fas fa-seedling text-6xl text-peruGreen/40 group-hover:scale-110 transition-transform"></i>
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-gray-900 text-base">Bagazo de Caña Deshidratado</h3>
+                            <span class="text-peruRed font-extrabold text-sm">S/ 0.60 / Kg</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-4">Ideal para compostaje masivo, biogás o empaques biodegradables.</p>
+                        <div class="text-[11px] text-gray-600 space-y-1 mb-4 bg-gray-50 p-2.5 rounded-xl">
+                            <div><i class="fas fa-weight-hanging text-peruGreen mr-1"></i> Stock: 5,000 Kg</div>
+                            <div><i class="fas fa-building text-peruRed mr-1"></i> Vendedor: AgroInsumos Perú</div>
+                            <div><i class="fas fa-location-dot text-gray-400 mr-1"></i> Ubicación: Huacho, Lima</div>
+                        </div>
+                        <button onclick="solicitarInsumo('Bagazo de Caña')" class="w-full py-2.5 bg-gray-900 hover:bg-black text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-2">
+                            <i class="fas fa-comments"></i> Contactar Vendedor
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MARKET REFERENCE PRICES MODULE (MEJORAS CORE) -->
+            <div id="precios" class="mt-16 bg-white rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-sm">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <span class="text-xs font-bold text-peruRed uppercase tracking-wider"><i class="fas fa-chart-line mr-1"></i> Precios Referenciales de Mercado</span>
+                        <h3 class="text-2xl font-black text-gray-900">Cotizaciones Actualizadas - Perú 2026</h3>
+                        <p class="text-xs text-gray-500">Transparencia comercial para evitar subvaluaciones en el mercado de reciclaje y residuos.</p>
+                    </div>
+                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs font-semibold">Actualizado hoy 09:00 AM</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gray-50 text-gray-700 font-bold border-b border-gray-200">
+                            <tr>
+                                <th class="p-3">Material / Residuo</th>
+                                <th class="p-3">Calidad / Presentación</th>
+                                <th class="p-3">Precio Prom. (S/ por Kg)</th>
+                                <th class="p-3">Tendencia Semanal</th>
+                                <th class="p-3 text-right">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-gray-700">
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-3 font-bold text-gray-900"><i class="fas fa-bottle-water text-peruGreen mr-2"></i>PET Transparente</td>
+                                <td class="p-3">Prensado en Fardos</td>
+                                <td class="p-3 font-bold text-peruGreen">S/ 2.20 - S/ 2.50</td>
+                                <td class="p-3 text-emerald-600 font-semibold"><i class="fas fa-arrow-up text-xs mr-1"></i> +3.5%</td>
+                                <td class="p-3 text-right"><button onclick="calcularCotizacion('PET', 2.35)" class="text-peruRed font-bold hover:underline">Cotizar Mi Lote</button></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-3 font-bold text-gray-900"><i class="fas fa-boxes-packing text-amber-700 mr-2"></i>Cartón Corrugado</td>
+                                <td class="p-3">Limpio y Seco (Fardo)</td>
+                                <td class="p-3 font-bold text-peruGreen">S/ 0.45 - S/ 0.60</td>
+                                <td class="p-3 text-gray-500 font-semibold"><i class="fas fa-minus text-xs mr-1"></i> Estable</td>
+                                <td class="p-3 text-right"><button onclick="calcularCotizacion('Cartón', 0.52)" class="text-peruRed font-bold hover:underline">Cotizar Mi Lote</button></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-3 font-bold text-gray-900"><i class="fas fa-cube text-slate-600 mr-2"></i>Cobre Sucio / Recorte</td>
+                                <td class="p-3">Segregado Industrial</td>
+                                <td class="p-3 font-bold text-peruGreen">S/ 24.00 - S/ 27.50</td>
+                                <td class="p-3 text-emerald-600 font-semibold"><i class="fas fa-arrow-up text-xs mr-1"></i> +5.1%</td>
+                                <td class="p-3 text-right"><button onclick="calcularCotizacion('Cobre', 25.75)" class="text-peruRed font-bold hover:underline">Cotizar Mi Lote</button></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-3 font-bold text-gray-900"><i class="fas fa-tree text-amber-800 mr-2"></i>Madera en Pallets (Usada)</td>
+                                <td class="p-3">Estructura Intacta (Por Unid)</td>
+                                <td class="p-3 font-bold text-peruGreen">S/ 12.00 - S/ 18.00 / Unid</td>
+                                <td class="p-3 text-emerald-600 font-semibold"><i class="fas fa-arrow-up text-xs mr-1"></i> +1.2%</td>
+                                <td class="p-3 text-right"><button onclick="calcularCotizacion('Pallets', 15.00)" class="text-peruRed font-bold hover:underline">Cotizar Mi Lote</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DYNAMIC INTERACTIVE IMPACT SIMULATION TOOL -->
+    <section id="impacto" class="py-16 bg-white border-y border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-12 gap-10 items-center">
+                
+                <div class="lg:col-span-5 space-y-4">
+                    <span class="px-3 py-1 bg-peruGreen-light text-peruGreen-dark text-xs font-extrabold rounded-full uppercase tracking-wider">
+                        Calculadora Interactiva Real-Time
+                    </span>
+                    <h2 class="text-3xl font-black text-gray-900">Simulador de Impacto Eco-Social</h2>
+                    <p class="text-sm text-gray-600">
+                        Calcula cuánto dióxido de carbono ($CO_2$) evitas, cuánta agua ahorras y cuántas familias beneficias al donar o revalorizar tus residuos con **REVALORA**.
+                    </p>
+
+                    <!-- Interactive Inputs -->
+                    <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 space-y-5">
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-gray-700 mb-1">
+                                <span>Selecciona Tipo de Material:</span>
+                                <span id="sim-material-label" class="text-peruGreen">Plástico PET</span>
+                            </div>
+                            <select id="sim-material" onchange="calcularImpacto()" class="w-full text-xs font-semibold rounded-xl border-gray-300 p-2.5 bg-white">
+                                <option value="pet">Plástico PET (Botellas/Envases)</option>
+                                <option value="carton">Cartón Corrugado / Papel</option>
+                                <option value="madera">Madera / Pallets Reciclados</option>
+                                <option value="textil">Saldos Textiles / Telas</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-gray-700 mb-1">
+                                <span>Cantidad Estimada:</span>
+                                <span id="sim-cantidad-val" class="text-peruRed font-extrabold text-sm">250 Kg</span>
+                            </div>
+                            <input type="range" id="sim-cantidad" min="10" max="2000" step="10" value="250" oninput="calcularImpacto()" class="w-full accent-peruRed">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-gray-700 mb-1">
+                                <span>Modalidad Destino:</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+                                <label class="flex items-center gap-2 p-2 bg-white rounded-xl border cursor-pointer hover:bg-gray-100">
+                                    <input type="radio" name="sim-destino" value="donacion" checked onchange="calcularImpacto()" class="text-peruGreen focus:ring-peruGreen"> Donación Social
+                                </label>
+                                <label class="flex items-center gap-2 p-2 bg-white rounded-xl border cursor-pointer hover:bg-gray-100">
+                                    <input type="radio" name="sim-destino" value="comercial" onchange="calcularImpacto()" class="text-peruRed focus:ring-peruRed"> Venta Mercado
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Dynamic Results Panel -->
+                <div class="lg:col-span-7">
+                    <div class="bg-gradient-to-br from-neutralDark to-gray-900 text-white rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                        <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl text-peruGreen">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+
+                        <div class="text-xs font-extrabold text-peruGreen uppercase tracking-widest mb-2">Resultados Estimados de Impacto</div>
+                        <h3 class="text-2xl font-bold mb-8">Tu Aporte al Planeta y la Comunidad</h3>
+
+                        <div class="grid sm:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 text-center">
+                                <div class="w-10 h-10 mx-auto bg-peruGreen text-white rounded-xl flex items-center justify-center text-lg mb-2"><i class="fas fa-smog"></i></div>
+                                <div class="text-2xl font-black text-emerald-400" id="res-co2">375 Kg</div>
+                                <div class="text-[11px] text-gray-300">Ahorro de $CO_2$eq</div>
+                            </div>
+
+                            <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 text-center">
+                                <div class="w-10 h-10 mx-auto bg-blue-500 text-white rounded-xl flex items-center justify-center text-lg mb-2"><i class="fas fa-droplet"></i></div>
+                                <div class="text-2xl font-black text-cyan-300" id="res-agua">1,250 Lts</div>
+                                <div class="text-[11px] text-gray-300">Agua Conservada</div>
+                            </div>
+
+                            <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 text-center">
+                                <div class="w-10 h-10 mx-auto bg-peruRed text-white rounded-xl flex items-center justify-center text-lg mb-2"><i class="fas fa-users"></i></div>
+                                <div class="text-2xl font-black text-rose-300" id="res-beneficiados">12 Familias</div>
+                                <div class="text-[11px] text-gray-300">Beneficiados / Empleos</div>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-between">
+                            <div>
+                                <div class="text-xs text-gray-400">Insignia Virtual a Desbloquear:</div>
+                                <div class="text-sm font-bold text-amber-300 flex items-center gap-2 mt-0.5">
+                                    <i class="fas fa-award text-base"></i> <span id="res-insignia-nombre">Campeón Eco-Perú Nivel 1</span>
+                                </div>
+                            </div>
+                            <button onclick="descargarReporteImpacto()" class="px-4 py-2.5 bg-peruGreen hover:bg-peruGreen-dark text-white rounded-xl text-xs font-bold transition-all shadow-md">
+                                <i class="fas fa-download mr-1"></i> Descargar Reporte
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- LOCATION CONSENT MAP WITH LEAFLET -->
+    <section id="mapa" class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-8">
+                <span class="px-3 py-1 bg-peruRed-light text-peruRed text-xs font-extrabold rounded-full uppercase tracking-wider">
+                    Geolocalización Segura
+                </span>
+                <h2 class="text-3xl font-black text-gray-900 mt-2">Puntos de Acopio & Causas Cercanas</h2>
+                <p class="text-xs sm:text-sm text-gray-600 mt-1">
+                    Encuentra centros de acopio autorizados y colegios aliados en Lima y provincias con consentimiento de ubicación previa.
+                </p>
+            </div>
+
+            <div class="bg-white p-4 rounded-3xl border border-gray-200 shadow-md">
+                <!-- Location Consent Banner -->
+                <div id="consent-banner" class="mb-4 bg-amber-50 border border-amber-200 p-3 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                    <div class="flex items-center gap-2 text-amber-800">
+                        <i class="fas fa-shield-halved text-base text-amber-600"></i>
+                        <span>Para ver la distancia exacta a tus puntos de acopio más cercanos, requerimos tu consentimiento de ubicación GPS.</span>
+                    </div>
+                    <button onclick="pedirUbicacion()" class="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl whitespace-nowrap shadow-xs">
+                        <i class="fas fa-location-crosshairs mr-1"></i> Consentir y Centrar
+                    </button>
+                </div>
+
+                <!-- Leaflet Map Container -->
+                <div id="leaflet-map" class="h-[400px] w-full rounded-2xl border border-gray-200 z-10"></div>
+                
+                <div class="mt-4 flex flex-wrap items-center justify-between text-xs text-gray-500 gap-2 px-2">
+                    <div class="flex gap-4">
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-peruRed inline-block"></span> Punto de Acopio REVALORA</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-peruGreen inline-block"></span> Causa / Colegio Aliado</span>
+                    </div>
+                    <span>Mostrando 4 puntos activos en Lima</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- YOUNG ENTREPRENEUR LEARNING HUB & QUIZ WITH CERTIFICATE -->
+    <section id="hub-jovenes" class="py-16 bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-12 gap-12 items-center">
+                
+                <div class="lg:col-span-6 space-y-6">
+                    <span class="px-3 py-1 bg-peruGreen-light text-peruGreen-dark text-xs font-extrabold rounded-full uppercase tracking-wider">
+                        Educación & Capacitación
+                    </span>
+                    <h2 class="text-3xl sm:text-4xl font-black text-gray-900">
+                        Hub de Aprendizaje para Jóvenes Emprendedores
+                    </h2>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        Aprende sobre ecodiseño, modelos de negocio circulares, normativa ambiental peruana ($Ley \, N^\circ 30884$) y valorización de residuos. ¡Obtén tu certificación oficial en 3 minutos!
+                    </p>
+
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <div class="w-8 h-8 rounded-lg bg-peruGreen text-white flex items-center justify-center shrink-0 font-bold"><i class="fas fa-book-open"></i></div>
+                            <div>
+                                <h4 class="text-xs font-bold text-gray-900">Guías de Monetización Sustentable</h4>
+                                <p class="text-[11px] text-gray-500">Aprende a formalizar tu emprendimiento verde y acceder a capital semilla.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <div class="w-8 h-8 rounded-lg bg-peruRed text-white flex items-center justify-center shrink-0 font-bold"><i class="fas fa-certificate"></i></div>
+                            <div>
+                                <h4 class="text-xs font-bold text-gray-900">Certificado Digital Descargable</h4>
+                                <p class="text-[11px] text-gray-500">Completa el test rápido de economía circular y descarga tu diploma firmado.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Quiz Widget -->
+                <div class="lg:col-span-6">
+                    <div class="bg-gradient-to-br from-peruGreen-light/30 via-white to-peruRed-light/30 p-6 sm:p-8 rounded-3xl border border-peruGreen/30 shadow-lg">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-xs font-bold text-peruGreen uppercase tracking-wider">Quiz de Evaluación Rápida</span>
+                            <span class="text-xs font-bold bg-white px-2.5 py-1 rounded-full text-gray-600 border border-gray-200">Pregunta <span id="quiz-step">1</span>/3</span>
+                        </div>
+
+                        <div id="quiz-box">
+                            <h3 class="text-base font-bold text-gray-900 mb-4" id="quiz-pregunta">
+                                ¿Cuál es el primer principio de la economía circular frente a los residuos?
+                            </h3>
+
+                            <div class="space-y-2 mb-6" id="quiz-opciones">
+                                <button onclick="responderQuiz(0)" class="w-full p-3 text-left bg-white hover:bg-peruGreen hover:text-white rounded-xl border border-gray-200 text-xs font-medium transition-all">
+                                    A) Quemar los residuos para generar energía inmediata.
+                                </button>
+                                <button onclick="responderQuiz(1)" class="w-full p-3 text-left bg-white hover:bg-peruGreen hover:text-white rounded-xl border border-gray-200 text-xs font-medium transition-all">
+                                    B) Reducir y rediseñar desde el origen para eliminar desperdicios.
+                                </button>
+                                <button onclick="responderQuiz(2)" class="w-full p-3 text-left bg-white hover:bg-peruGreen hover:text-white rounded-xl border border-gray-200 text-xs font-medium transition-all">
+                                    C) Enviar todo al relleno sanitario directamente.
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quiz Result (Hidden Initially) -->
+                        <div id="quiz-resultado" class="hidden text-center space-y-4 py-4">
+                            <div class="w-16 h-16 mx-auto bg-peruGreen text-white rounded-full flex items-center justify-center text-3xl shadow-lg">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <h3 class="text-xl font-extrabold text-gray-900">¡Aprobaste con Éxito!</h3>
+                            <p class="text-xs text-gray-600">Demostraste conocimientos sólidos en Economía Circular y Sostenibilidad Ambiental.</p>
+                            
+                            <button onclick="descargarCertificado()" class="px-6 py-3 bg-peruRed hover:bg-peruRed-dark text-white rounded-xl font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2 mx-auto">
+                                <i class="fas fa-file-pdf text-base"></i> Descargar Certificado PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-neutralDark text-white border-t border-gray-800 pt-12 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-peruRed flex items-center justify-center font-bold text-white"><i class="fas fa-recycle"></i></div>
+                        <span class="text-xl font-black">REVALORA<span class="text-peruRed">.pe</span></span>
+                    </div>
+                    <p class="text-xs text-gray-400">Plataforma peruana para el intercambio, donación y revalorización de insumos y residuos industriales.</p>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-3">Módulos</h4>
+                    <ul class="space-y-2 text-xs text-gray-400">
+                        <li><a href="#donaciones" class="hover:text-peruGreen">Donaciones de Materiales</a></li>
+                        <li><a href="#mercado" class="hover:text-peruGreen">Mercado Circular B2B</a></li>
+                        <li><a href="#precios" class="hover:text-peruGreen">Precios Referenciales</a></li>
+                        <li><a href="#impacto" class="hover:text-peruGreen">Simulador de CO2</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-3">Aliados & Impacto</h4>
+                    <ul class="space-y-2 text-xs text-gray-400">
+                        <li><a href="#mapa" class="hover:text-peruRed">Puntos de Acopio Lima</a></li>
+                        <li><a href="#hub-jovenes" class="hover:text-peruRed">Hub Emprendedores</a></li>
+                        <li><span class="text-peruGreen font-semibold">MINAM Perú / PRODUCE</span></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-3">Contacto Directo</h4>
+                    <p class="text-xs text-gray-400 mb-2">¿Necesitas ayuda con una donación grande?</p>
+                    <button onclick="openChatModal()" class="px-4 py-2 bg-peruGreen text-white text-xs font-bold rounded-xl hover:bg-peruGreen-dark transition-all w-full flex items-center justify-center gap-2">
+                        <i class="fas fa-headset"></i> Hablar con Asesor Eco
+                    </button>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 pt-6 text-center text-xs text-gray-500">
+                <p>© 2026 REVALORA Perú. Todos los derechos reservados. Diseñado con orgullo para la sostenibilidad nacional.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- LIVE CHAT MODAL -->
+    <div id="modal-chat" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-gray-100 flex flex-col h-[500px]">
+            <!-- Chat Header -->
+            <div class="bg-gradient-to-r from-peruGreen to-peruGreen-dark p-4 text-white flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-white text-peruGreen flex items-center justify-center font-bold text-lg"><i class="fas fa-robot"></i></div>
+                    <div>
+                        <h4 class="font-bold text-sm">Asistente Virtual REVALORA</h4>
+                        <span class="text-[10px] text-emerald-200 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> En línea ahora</span>
+                    </div>
+                </div>
+                <button onclick="closeModal('modal-chat')" class="text-white hover:text-gray-200"><i class="fas fa-times text-lg"></i></button>
+            </div>
+
+            <!-- Chat Messages Body -->
+            <div class="p-4 flex-1 overflow-y-auto space-y-3 bg-gray-50 text-xs" id="chat-messages">
+                <div class="bg-white p-3 rounded-2xl border border-gray-200 max-w-[85%] text-gray-800 shadow-xs">
+                    ¡Hola! 🇵🇪 Bienvenido a REVALORA. ¿En qué te puedo orientar hoy? ¿Deseas donar materiales o cotizar residuos?
+                </div>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="p-3 bg-white border-t border-gray-200 flex gap-2">
+                <input type="text" id="chat-input" placeholder="Escribe tu mensaje aquí..." onkeypress="handleChatEnter(event)" class="flex-1 text-xs border border-gray-300 rounded-xl px-3 py-2.5 focus:border-peruGreen focus:outline-none">
+                <button onclick="enviarMensajeChat()" class="px-4 py-2.5 bg-peruRed text-white rounded-xl text-xs font-bold hover:bg-peruRed-dark"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: REGISTER PYME ONBOARDING (WITH 30 DAY FREE TRIAL BADGE) -->
+    <div id="modal-onboarding" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-1 bg-peruGreen-light text-peruGreen-dark text-[11px] font-bold rounded-full">
+                        <i class="fas fa-gift"></i> Pruebas Gratis 30 Días
+                    </span>
+                </div>
+                <button onclick="closeModal('modal-onboarding')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <h3 class="text-xl font-black text-gray-900 mb-1">Onboarding para Pymes y Empresas</h3>
+            <p class="text-xs text-gray-500 mb-6">Regístrate para vender o solicitar insumos con acceso completo sin costo durante 30 días.</p>
+
+            <form onsubmit="completarOnboarding(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">RUC o DNI de la Pyme</label>
+                    <input type="text" required placeholder="Ej: 20600000001" class="w-full text-xs p-3 rounded-xl border border-gray-300">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Nombre Comercial de la Empresa</label>
+                    <input type="text" required placeholder="Ej: EcoMadera Perú S.A.C." class="w-full text-xs p-3 rounded-xl border border-gray-300">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Rubro Principal</label>
+                    <select class="w-full text-xs p-3 rounded-xl border border-gray-300">
+                        <option>Manufactura / Textil</option>
+                        <option>Carpintería / Mueblería</option>
+                        <option>Plásticos y Empaques</option>
+                        <option>Reciclaje y Gestión de Residuos</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full py-3 bg-peruRed hover:bg-peruRed-dark text-white font-bold rounded-xl text-xs transition-all shadow-md">
+                    Activar Prueba Gratuita de 30 Días
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: DONAR MATERIAL (PRODUCT & MATERIAL DONATIONS FLOW) -->
+    <div id="modal-donar" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <span class="px-2.5 py-1 bg-peruRed-light text-peruRed text-[11px] font-bold rounded-full">
+                    <i class="fas fa-heart"></i> Formulario de Donación Directa
+                </span>
+                <button onclick="closeModal('modal-donar')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <h3 class="text-xl font-black text-gray-900 mb-1">Registrar Donación de Materiales</h3>
+            <p class="text-xs text-gray-500 mb-6">Tu donación beneficiará a colegios técnicos, talleres comunitarios y recicladores formalizados.</p>
+
+            <form onsubmit="procesarDonacionForm(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Material o Producto a Donar</label>
+                    <input type="text" id="donar-item-nombre" required placeholder="Ej: 50 Tableros de Madera sobrante" class="w-full text-xs p-3 rounded-xl border border-gray-300">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Cantidad Estimada</label>
+                        <input type="text" required placeholder="Ej: 120 Kg o 50 Unid" class="w-full text-xs p-3 rounded-xl border border-gray-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Estado del Recurso</label>
+                        <select class="w-full text-xs p-3 rounded-xl border border-gray-300">
+                            <option>Nuevo / Sobrante sin uso</option>
+                            <option>Usado en Buen Estado</option>
+                            <option>Reciclable Segregado</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Destinatario Preferido</label>
+                    <select class="w-full text-xs p-3 rounded-xl border border-gray-300">
+                        <option>Cualquier Causa Necesitada en mi Distrito</option>
+                        <option>Colegios Públicos y Talleres</option>
+                        <option>Asociaciones de Recicladores San Juan de Lurigancho</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full py-3 bg-peruGreen hover:bg-peruGreen-dark text-white font-bold rounded-xl text-xs transition-all shadow-md">
+                    Enviar Registro de Donación
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Global State & Init
+        document.addEventListener('DOMContentLoaded', function() {
+            initLeafletMap();
+            calcularImpacto();
+        });
+
+        // 1. Modal Helper Functions
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 2. Hero Interactive Tabs
+        function switchHeroTab(tab) {
+            const tabDonar = document.getElementById('hero-tab-donar');
+            const tabVender = document.getElementById('hero-tab-vender');
+            const contentDonar = document.getElementById('hero-content-donar');
+            const contentVender = document.getElementById('hero-content-vender');
+
+            if (tab === 'donar') {
+                tabDonar.className = 'py-2.5 px-3 rounded-xl bg-white text-peruRed shadow-xs transition-all font-bold';
+                tabVender.className = 'py-2.5 px-3 rounded-xl text-gray-600 hover:text-gray-900 transition-all font-bold';
+                contentDonar.classList.remove('hidden');
+                contentVender.classList.add('hidden');
+            } else {
+                tabVender.className = 'py-2.5 px-3 rounded-xl bg-white text-peruGreen shadow-xs transition-all font-bold';
+                tabDonar.className = 'py-2.5 px-3 rounded-xl text-gray-600 hover:text-gray-900 transition-all font-bold';
+                contentVender.classList.remove('hidden');
+                contentDonar.classList.add('hidden');
+            }
+        }
+
+        // 3. Donation Filtering & Interactivity
+        function filterDonations(tipo) {
+            const cards = document.querySelectorAll('.cause-card');
+            cards.forEach(card => {
+                if (tipo === 'todos') {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = card.classList.contains(tipo) ? 'flex' : 'none';
+                }
+            });
+        }
+
+        function atenderDonacion(causa) {
+            document.getElementById('donar-item-nombre').value = 'Donación para: ' + causa;
+            openModal('modal-donar');
+        }
+
+        function procesarDonacionForm(e) {
+            e.preventDefault();
+            closeModal('modal-donar');
+            
+            // Trigger Confetti Celebration
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            alert('¡Gracias por tu espíritu solidario! Tu propuesta de donación fue registrada. Un coordinador de REVALORA te contactará para el recojo.');
+        }
+
+        // 4. Market Filtering
+        function filterMarket(cat) {
+            const items = document.querySelectorAll('.market-item');
+            items.forEach(item => {
+                if (cat === 'all') {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = item.classList.contains(cat) ? 'block' : 'none';
+                }
+            });
+        }
+
+        function solicitarInsumo(item) {
+            openChatModal();
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML += `
+                <div class="bg-peruGreen-light p-3 rounded-2xl text-peruGreen-dark max-w-[85%] ml-auto text-xs font-semibold shadow-xs">
+                    Hola, deseo contactar al vendedor del material: <strong>${item}</strong>.
+                </div>
+                <div class="bg-white p-3 rounded-2xl border border-gray-200 max-w-[85%] text-gray-800 shadow-xs">
+                    Excelente elección. Te estoy conectando de inmediato con el representante verificado de dicho lote.
+                </div>
+            `;
+        }
+
+        function calcularCotizacion(material, precio) {
+            const cantidad = prompt(`¿Cuántos Kg o Unidades tienes de ${material}?`, '100');
+            if (cantidad && !isNaN(cantidad)) {
+                const total = (parseFloat(cantidad) * precio).toFixed(2);
+                alert(`Monto estimado referencial a recibir por ${cantidad} unidades/Kg de ${material}: S/ ${total} PEN.`);
+            }
+        }
+
+        // 5. Dynamic Interactive Impact Simulator
+        function calcularImpacto() {
+            const material = document.getElementById('sim-material').value;
+            const cantidad = parseFloat(document.getElementById('sim-cantidad').value);
+            
+            document.getElementById('sim-cantidad-val').innerText = `${cantidad} Kg`;
+
+            let factorCO2 = 1.5;
+            let factorAgua = 5.0;
+            let factorFamilias = 0.05;
+
+            if (material === 'pet') {
+                factorCO2 = 1.8; factorAgua = 6.2;
+            } else if (material === 'carton') {
+                factorCO2 = 1.1; factorAgua = 15.0;
+            } else if (material === 'madera') {
+                factorCO2 = 0.9; factorAgua = 3.0;
+            } else if (material === 'textil') {
+                factorCO2 = 2.5; factorAgua = 20.0;
+            }
+
+            const co2 = Math.round(cantidad * factorCO2);
+            const agua = Math.round(cantidad * factorAgua);
+            const familias = Math.max(1, Math.round(cantidad * factorFamilias));
+
+            document.getElementById('res-co2').innerText = `${co2.toLocaleString()} Kg`;
+            document.getElementById('res-agua').innerText = `${agua.toLocaleString()} Lts`;
+            document.getElementById('res-beneficiados').innerText = `${familias} Familias`;
+
+            if (cantidad < 200) {
+                document.getElementById('res-insignia-nombre').innerText = 'Aliado Bronce Eco-Perú';
+            } else if (cantidad < 800) {
+                document.getElementById('res-insignia-nombre').innerText = 'Campeón Plata Eco-Perú';
+            } else {
+                document.getElementById('res-insignia-nombre').innerText = 'Líder Oro Economía Circular';
+            }
+        }
+
+        function descargarReporteImpacto() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFillColor(0, 135, 81);
+            doc.rect(0, 0, 210, 30, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18);
+            doc.text("REVALORA.pe - Reporte de Impacto Eco-Social", 15, 20);
+
+            doc.setTextColor(30, 41, 59);
+            doc.setFontSize(12);
+            doc.text("Resumen de Ahorro e Impacto Ambiental:", 15, 45);
+
+            const co2 = document.getElementById('res-co2').innerText;
+            const agua = document.getElementById('res-agua').innerText;
+            const familias = document.getElementById('res-beneficiados').innerText;
+
+            doc.text(`- Reducción de Huella de Carbono: ${co2}`, 20, 60);
+            doc.text(`- Preservación de Recursos Hídricos: ${agua}`, 20, 70);
+            doc.text(`- Beneficio Social Estimado: ${familias}`, 20, 80);
+
+            doc.text("Emitido bajo los parámetros de Economía Circular Perú 2026.", 15, 110);
+            doc.save("Reporte_Impacto_REVALORA.pdf");
+        }
+
+        // 6. Interactive Leaflet Map Logic
+        let leafletMap;
+        function initLeafletMap() {
+            // Lima Peru coordinates
+            leafletMap = L.map('leaflet-map').setView([-12.046374, -77.042793], 11);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(leafletMap);
+
+            // Red Custom Marker Icon (Acopio)
+            const redIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: "<div style='background-color:#C8102E; width:18px; height:18px; border-radius:50%; border:3px solid white; shadow:0 2px 5px rgba(0,0,0,0.5);'></div>",
+                iconSize: [18, 18],
+                iconAnchor: [9, 9]
+            });
+
+            // Green Custom Marker Icon (Causa)
+            const greenIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: "<div style='background-color:#008751; width:18px; height:18px; border-radius:50%; border:3px solid white; shadow:0 2px 5px rgba(0,0,0,0.5);'></div>",
+                iconSize: [18, 18],
+                iconAnchor: [9, 9]
+            });
+
+            // Sample Markers in Lima
+            L.marker([-12.0300, -76.9200], {icon: greenIcon}).addTo(leafletMap)
+                .bindPopup("<b>Colegio Fe y Alegría</b><br>Recibe retazos de madera en Ate.");
+
+            L.marker([-12.2100, -76.9400], {icon: redIcon}).addTo(leafletMap)
+                .bindPopup("<b>Punto Acopio REVALORA Villa El Salvador</b><br>Acepta plásticos PET y metales.");
+
+            L.marker([-11.9800, -77.0000], {icon: greenIcon}).addTo(leafletMap)
+                .bindPopup("<b>Taller Manos Emprendedoras</b><br>San Juan de Lurigancho - Telas.");
+
+            L.marker([-12.0500, -77.1300], {icon: redIcon}).addTo(leafletMap)
+                .bindPopup("<b>Punto Acopio Callao Industrial</b><br>Acepta papel y cartón corrugado.");
+        }
+
+        function pedirUbicacion() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        leafletMap.setView([lat, lng], 13);
+                        
+                        L.marker([lat, lng]).addTo(leafletMap)
+                            .bindPopup("<b>¡Tu Ubicación Actual!</b><br>Puntos de acopio centrados cerca de ti.").openPopup();
+
+                        document.getElementById('consent-banner').classList.add('hidden');
+                    },
+                    () => {
+                        alert("No se pudo obtener la ubicación GPS. Mostrando vista general de Lima.");
+                    }
+                );
+            } else {
+                alert("Geolocalización no soportada por el navegador.");
+            }
+        }
+
+        // 7. Youth Hub Interactive Quiz System
+        const quizPreguntas = [
+            {
+                q: "¿Cuál es el primer principio de la economía circular frente a los residuos?",
+                ops: [
+                    "A) Quemar los residuos para generar energía inmediata.",
+                    "B) Reducir y rediseñar desde el origen para eliminar desperdicios.",
+                    "C) Enviar todo al relleno sanitario directamente."
+                ],
+                correct: 1
+            },
+            {
+                q: "¿Qué beneficio principal ofrece la donación de saldos de madera o tela?",
+                ops: [
+                    "A) Permite la capacitación técnica de jóvenes y evita contaminación.",
+                    "B) Incrementa los costos de inventario de la empresa.",
+                    "C) No genera ningún impacto ambiental ni social."
+                ],
+                correct: 0
+            },
+            {
+                q: "¿Qué promueve la Ley N° 30884 en el Perú?",
+                ops: [
+                    "A) El uso indiscriminado de plásticos de un solo uso.",
+                    "B) La regulación y reducción de plásticos de un solo uso y tecnopor.",
+                    "C) La prohibición de todo tipo de reciclaje."
+                ],
+                correct: 1
+            }
+        ];
+
+        let quizIndex = 0;
+        let quizScore = 0;
+
+        function responderQuiz(opIndex) {
+            if (opIndex === quizPreguntas[quizIndex].correct) {
+                quizScore++;
+            }
+
+            quizIndex++;
+            if (quizIndex < quizPreguntas.length) {
+                document.getElementById('quiz-step').innerText = quizIndex + 1;
+                document.getElementById('quiz-pregunta').innerText = quizPreguntas[quizIndex].q;
+                
+                const optionsDiv = document.getElementById('quiz-opciones');
+                optionsDiv.innerHTML = '';
+                quizPreguntas[quizIndex].ops.forEach((op, idx) => {
+                    optionsDiv.innerHTML += `
+                        <button onclick="responderQuiz(${idx})" class="w-full p-3 text-left bg-white hover:bg-peruGreen hover:text-white rounded-xl border border-gray-200 text-xs font-medium transition-all">
+                            ${op}
+                        </button>
+                    `;
+                });
+            } else {
+                document.getElementById('quiz-box').classList.add('hidden');
+                document.getElementById('quiz-resultado').classList.remove('hidden');
+                confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+            }
+        }
+
+        function descargarCertificado() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+
+            doc.setLineWidth(4);
+            doc.setDrawColor(0, 135, 81);
+            doc.rect(10, 10, 277, 190);
+
+            doc.setDrawColor(200, 16, 46);
+            doc.rect(14, 14, 269, 182);
+
+            doc.setTextColor(200, 16, 46);
+            doc.setFontSize(26);
+            doc.text("REVALORA PERÚ", 148, 45, { align: "center" });
+
+            doc.setTextColor(30, 41, 59);
+            doc.setFontSize(16);
+            doc.text("OTORGA EL PRESENTE CERTIFICADO A:", 148, 65, { align: "center" });
+
+            doc.setFontSize(22);
+            doc.setTextColor(0, 135, 81);
+            doc.text("Emprendedor Sustentable Perú", 148, 85, { align: "center" });
+
+            doc.setFontSize(12);
+            doc.setTextColor(71, 85, 105);
+            doc.text("Por haber completado satisfactoriamente la evaluación de conocimientos en", 148, 105, { align: "center" });
+            doc.text("Economía Circular, Gestión de Insumos y Sostenibilidad Ambiental.", 148, 115, { align: "center" });
+
+            doc.text("Lima, Perú - 2026", 148, 150, { align: "center" });
+
+            doc.save("Certificado_Economia_Circular_REVALORA.pdf");
+        }
+
+        // 8. Live Chat Modal Helper
+        function openChatModal() {
+            document.getElementById('modal-chat').classList.remove('hidden');
+        }
+
+        function handleChatEnter(e) {
+            if (e.key === 'Enter') {
+                enviarMensajeChat();
+            }
+        }
+
+        function enviarMensajeChat() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML += `
+                <div class="bg-peruGreen-light p-3 rounded-2xl text-peruGreen-dark max-w-[85%] ml-auto text-xs font-semibold shadow-xs">
+                    ${text}
+                </div>
+            `;
+
+            input.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            setTimeout(() => {
+                chatMessages.innerHTML += `
+                    <div class="bg-white p-3 rounded-2xl border border-gray-200 max-w-[85%] text-gray-800 shadow-xs">
+                        ¡Gracias por tu mensaje! Un especialista de REVALORA está revisando tu consulta sobre <strong>"${text}"</strong> y se pondrá en contacto en breve.
+                    </div>
+                `;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 1000);
+        }
+
+        function completarOnboarding(e) {
+            e.preventDefault();
+            closeModal('modal-onboarding');
+            alert("¡Registro exitoso! Se ha activado tu membresía de prueba por 30 días sin costo en REVALORA.");
+        }
+    </script>
+</body>
+</html>
